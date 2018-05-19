@@ -4,6 +4,8 @@ import java.awt.Component;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
+
 import javax.swing.JOptionPane;
 
 public class ConBD {
@@ -28,6 +30,24 @@ public class ConBD {
 		}
 		
 		return conn;
+		
+	}
+	
+	public static boolean ejecutarUpdateSQL(Connection conn,String sql) {
+		
+		Statement stat;
+		try {
+			stat = conn.createStatement();
+			stat.executeUpdate(sql);
+			
+			return true;
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
 		
 	}
 	
