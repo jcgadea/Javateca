@@ -43,28 +43,7 @@ public class GestionLibros {
 	private JButton btnEliminar;
 	private JLabel avisoYaExiste;
 	private DefaultTableModel modelo;
-	
-	private void vaciar() {
 		
-		   isbnTField.setText("");
-		   signaturaTField.setText("");
-		   tituloTField.setText("");
-		   autorTField.setText("");
-		   materiaTField.setText("");
-		   editorialTField.setText("");
-		   
-		   isbnTField.setEditable(true);
-		   isbnTField.setBackground(new Color(255,255,255));
-		   
-		   btnNuevoMod.setText("Nuevo");
-		   btnNuevoMod.setToolTipText("Da de alta un nuevo registro con los datos del formulario");
-		   
-		   avisoYaExiste.setForeground(Color.WHITE);
-		   
-		   btnEliminar.setEnabled(false);
-		
-	}
-	
 	private void vaciar(Connection conn) {
 		
 		   isbnTField.setText("");
@@ -86,7 +65,7 @@ public class GestionLibros {
 		   
 		   textFieldBusqueda.setText("");
 		   
-		   String sql = "select * from libros";
+		   String sql = "select * from JAVATECA_LIBROS";
 		   
 		   modelo = Buscador.buscar(sql, conn);
 		   
@@ -106,11 +85,22 @@ public class GestionLibros {
 		
 		try {
 			
-			modelo = Buscador.buscar("select * from libros", conn);
+			modelo = Buscador.buscar("select * from JAVATECA_LIBROS", conn);
 				
 			JScrollPane scrollPane = new JScrollPane();
 			
-			tableDatos = new JTable(modelo);
+			tableDatos = new JTable(modelo) {
+		        private static final long serialVersionUID = 1L;
+
+		        public boolean isCellEditable(int row, int column) {                
+		                return false; 
+		                
+		        
+		        };
+		    };
+		    
+		    tableDatos.getTableHeader().setReorderingAllowed(false);
+		    
 			tableDatos.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
@@ -149,11 +139,11 @@ public class GestionLibros {
 					
 					if(textFieldBusqueda.getText().equals("")) {
 						
-						sql = "select * from libros";
+						sql = "select * from JAVATECA_LIBROS";
 						
 					}else {
 					
-						sql = "select * from libros where upper("+comboBoxBuscar.getSelectedItem()+") like upper('"+textFieldBusqueda.getText()+"%')";
+						sql = "select * from JAVATECA_LIBROS where upper("+comboBoxBuscar.getSelectedItem()+") like upper('"+textFieldBusqueda.getText()+"%')";
 						
 					}
 					
@@ -404,11 +394,11 @@ public class GestionLibros {
 				@Override
 				public void keyReleased(KeyEvent arg0) {
 					
-					if(Buscador.existeClave("LIBROS", "ISBN", isbnTField.getText(), conn)){
+					if(Buscador.existeClave("JAVATECA_LIBROS", "ISBN", isbnTField.getText(), conn, null)){
 						
 						avisoYaExiste.setForeground(Color.RED);
 						textFieldBusqueda.setText(isbnTField.getText());
-						String sql = "select * from libros where isbn like upper('"+isbnTField.getText()+"')";
+						String sql = "select * from JAVATECA_LIBROS where isbn like upper('"+isbnTField.getText()+"')";
 						tableDatos.setModel(Buscador.buscar(sql, conn));
 						btnNuevoMod.setText("Modificar");
 						btnNuevoMod.setToolTipText("Modifica el registro seleccionado");
@@ -418,7 +408,7 @@ public class GestionLibros {
 						
 						avisoYaExiste.setForeground(Color.WHITE);
 						textFieldBusqueda.setText("");
-						String sql = "select * from libros";
+						String sql = "select * from JAVATECA_LIBROS";
 						tableDatos.setModel(Buscador.buscar(sql, conn));
 						btnNuevoMod.setText("Nuevo");
 						btnNuevoMod.setToolTipText("Da de alta un nuevo registro con los datos del formulario");
@@ -442,7 +432,7 @@ public class GestionLibros {
 					
 					if(btnNuevoMod.getText().equals("Nuevo")) {
 						
-						String sql = "INSERT INTO LIBROS(ISBN,SIGNATURA,TITULO,AUTOR,MATERIA,EDITORIAL) VALUES"
+						String sql = "INSERT INTO JAVATECA_LIBROS(ISBN,SIGNATURA,TITULO,AUTOR,MATERIA,EDITORIAL) VALUES"
 								+ "('"+isbnTField.getText().toUpperCase()+"','"
 								+ signaturaTField.getText().toUpperCase()+"','"
 								+ tituloTField.getText().toUpperCase()+"','"
@@ -456,14 +446,14 @@ public class GestionLibros {
 							
 							
 							textFieldBusqueda.setText("");
-							sql = "select * from libros";
+							sql = "select * from JAVATECA_LIBROS";
 							modelo = Buscador.buscar(sql, conn);
 							tableDatos.setModel(modelo);
 							
 							Object frame = null;
 							JOptionPane.showMessageDialog((Component) frame,
 								    "Libro con ISBN '"+isbnTField.getText()+"' creado correctamente.","Creación correcta",JOptionPane.DEFAULT_OPTION);
-							vaciar();
+							vaciar(conn);
 							
 							
 						}else {
@@ -476,7 +466,7 @@ public class GestionLibros {
 						
 					}else {
 						
-						String sql = "UPDATE LIBROS SET "
+						String sql = "UPDATE JAVATECA_LIBROS SET "
 								+ "SIGNATURA = '"+signaturaTField.getText().toUpperCase()+"',"
 								+ "TITULO = '"+tituloTField.getText().toUpperCase()+"',"
 								+ "AUTOR = '"+autorTField.getText().toUpperCase()+"',"
@@ -484,14 +474,14 @@ public class GestionLibros {
 								+ "EDITORIAL = '"+editorialTField.getText().toUpperCase()+"'"
 								+ " WHERE ISBN = '"+isbnTField.getText().toUpperCase()+"'";
 						
-						System.out.println(sql);
+						//System.out.println(sql);
 						
 						if(ConBD.ejecutarUpdateSQL(conn, sql)) {
 							
 							Object frame = null;
 							
 							
-							sql = "select * from libros where isbn = '"+isbnTField.getText()+"'";
+							sql = "select * from JAVATECA_LIBROS where isbn = '"+isbnTField.getText()+"'";
 							modelo = Buscador.buscar(sql, conn);
 							tableDatos.setModel(modelo);
 							
@@ -516,12 +506,12 @@ public class GestionLibros {
 			btnEliminar.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					
-					String sql = "DELETE FROM LIBROS WHERE ISBN = '"+isbnTField.getText()+"'";
+					String sql = "DELETE from JAVATECA_LIBROS WHERE ISBN = '"+isbnTField.getText()+"'";
 					
 					if(ConBD.ejecutarUpdateSQL(conn, sql)) {
 						
 						textFieldBusqueda.setText("");
-						sql = "select * from libros";
+						sql = "select * from JAVATECA_LIBROS";
 						modelo = Buscador.buscar(sql, conn);
 						tableDatos.setModel(modelo);
 						
@@ -529,7 +519,7 @@ public class GestionLibros {
 						JOptionPane.showMessageDialog((Component) frame,
 							    "Libro con ISBN '"+isbnTField.getText()+"' eliminado correctamente.","Eliminación correcta",JOptionPane.DEFAULT_OPTION);
 						
-						vaciar();
+						vaciar(conn);
 						
 					}else {
 						

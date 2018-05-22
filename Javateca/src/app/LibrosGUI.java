@@ -1,6 +1,5 @@
 package app;
 
-import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -16,6 +15,7 @@ import javax.swing.ImageIcon;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.net.URL;
+import java.sql.Connection;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.SpringLayout;
@@ -28,33 +28,75 @@ import java.awt.event.InputEvent;
 
 @SuppressWarnings("serial")
 public class LibrosGUI extends JFrame {
-
-	private JPanel contentPane;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					LibrosGUI frame = new LibrosGUI();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	
+	private JMenuItem menuArPreferencias;
+	private JMenuItem menuArSalir;
+	private JMenuItem mntmGestLibros;
+	private JMenuItem mntmLibrosPdf;
+	private JMenuItem mntmGestCds;
+	private JMenuItem mntmCDPdf;
+	private JMenuItem mntmGestRevistas;
+	private JMenuItem menuAyuGithub;
+	private JMenuItem menuAyuDocu;
+	private JMenuItem mntmRevistasPdf;
+	private JMenuItem menuAyuLicencia;
+	private JMenuBar menuBar;
+	private JMenu mnMenu;
+	private JMenu mnMateriales;
+	private JMenu mnLibros;
+	private JMenu mnCD;
+	private JMenu mnRevistas;
+	private JMenu mnNewMenu;
+	private static JButton btnAtras;
+	private static CardLayout cl;
+	private JPanel panelVacio;
+	private JLabel lblNewLabel_2;
+	private JLabel lblNewLabel_1;
+	private static JPanel contentPane;
+	private JMenu mnUsuariosYPrestamos;
+	private JMenu mnUsuarios;
+	private JMenuItem mntmGestionarUsuarios;
+	private JMenuItem mntmUsuariosPdf;
+	private JMenu mnPrestamos;
+	private JMenuItem mntmGestionarPrestamos;
+	private JMenuItem mntmPrestamosPdf;
+	
+	
 
 	/**
 	 * Create the frame.
 	 */
-	public LibrosGUI() {
+	public LibrosGUI(Connection conn) {
 		
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			// TODO UIManager.getDefaults().put("Button.showMnemonics", Boolean.TRUE);
+			
+			String lf = Configuracion.leerValor("interfaz.estilo");
+			
+			switch (lf) {
+			case "Metal":
+				
+				lf = UIManager.getCrossPlatformLookAndFeelClassName();
+				break;
+				
+			case "Motif":
+				
+				lf = "com.sun.java.swing.plaf.motif.MotifLookAndFeel";
+				break;
+				
+			case "System":
+				
+				lf = UIManager.getSystemLookAndFeelClassName();
+				break;
+
+			default:
+				break;
+			}
+			
+			UIManager.setLookAndFeel(lf);
+			
+			
+			
+			UIManager.getDefaults().put("Button.showMnemonics", Boolean.TRUE);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException e1) {
 			e1.printStackTrace();
@@ -65,76 +107,109 @@ public class LibrosGUI extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 600);
 		
-		JMenuBar menuBar = new JMenuBar();
+		menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 		
-		JMenu mnMenu = new JMenu("Archivo");
+		mnMenu = new JMenu("Archivo");
 		mnMenu.setMnemonic('A');
 		menuBar.add(mnMenu);
 		
-		JMenuItem menuArPreferencias = new JMenuItem("Preferencias");
+		menuArPreferencias = new JMenuItem("Preferencias");
+	
 		menuArPreferencias.setIcon(new ImageIcon(LibrosGUI.class.getResource("/resources/config.png")));
 		mnMenu.add(menuArPreferencias);
 		
-		JMenuItem menuArSalir = new JMenuItem("Salir");
+		menuArSalir = new JMenuItem("Salir");
 
 		menuArSalir.setIcon(new ImageIcon(LibrosGUI.class.getResource("/javax/swing/plaf/metal/icons/ocean/close.gif")));
 		mnMenu.add(menuArSalir);
 		
-		JMenu mnMateriales = new JMenu("Materiales");
+		mnMateriales = new JMenu("Materiales");
 		mnMateriales.setMnemonic('M');
 		menuBar.add(mnMateriales);
 		
-		JMenu mnLibros = new JMenu("Libros");
+		mnLibros = new JMenu("Libros");
 		mnMateriales.add(mnLibros);
 		
-		JMenuItem mntmGestLibros = new JMenuItem("Gestionar libros");
+		mntmGestLibros = new JMenuItem("Gestionar libros");
 		mntmGestLibros.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_MASK));
 
 		mnLibros.add(mntmGestLibros);
 		
-		JMenuItem mntmLibrosPdf = new JMenuItem("Informe (PDF)");
+		mntmLibrosPdf = new JMenuItem("Informe (PDF)");
+
+		mntmLibrosPdf.setIcon(new ImageIcon(LibrosGUI.class.getResource("/resources/pdf16.png")));
 		mnLibros.add(mntmLibrosPdf);
 		
-		JMenu mnCD = new JMenu("CD-ROMs");
+		mnCD = new JMenu("CD-ROMs");
 		mnMateriales.add(mnCD);
 		
-		JMenuItem mntmGestCds = new JMenuItem("Gestionar CDs");
+		mntmGestCds = new JMenuItem("Gestionar CDs");
 
 		mntmGestCds.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
 		mnCD.add(mntmGestCds);
 		
-		JMenuItem mntmCDPdf = new JMenuItem("Informe (PDF)");
+		mntmCDPdf = new JMenuItem("Informe (PDF)");
+
+		mntmCDPdf.setIcon(new ImageIcon(LibrosGUI.class.getResource("/resources/pdf16.png")));
 		mnCD.add(mntmCDPdf);
 		
-		JMenu mnRevistas = new JMenu("Revistas");
+		mnRevistas = new JMenu("Revistas");
 		mnMateriales.add(mnRevistas);
 		
-		JMenuItem mntmGestRevistas = new JMenuItem("Gestionar revistas");
+		mntmGestRevistas = new JMenuItem("Gestionar revistas");
 
 		mntmGestRevistas.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK));
 		mnRevistas.add(mntmGestRevistas);
 		
-		JMenuItem mntmRevistasPdf = new JMenuItem("Informe (PDF)");
+		mntmRevistasPdf = new JMenuItem("Informe (PDF)");
+		mntmRevistasPdf.setIcon(new ImageIcon(LibrosGUI.class.getResource("/resources/pdf16.png")));
 		mnRevistas.add(mntmRevistasPdf);
 		
-		JMenu mnNewMenu = new JMenu("Ayuda");
+		mnUsuariosYPrestamos = new JMenu("Usuarios y prestamos");
+		mnUsuariosYPrestamos.setMnemonic('U');
+		menuBar.add(mnUsuariosYPrestamos);
+		
+		mnUsuarios = new JMenu("Usuarios");
+		mnUsuariosYPrestamos.add(mnUsuarios);
+		
+		mntmGestionarUsuarios = new JMenuItem("Gestionar usuarios");
+
+		mntmGestionarUsuarios.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.CTRL_MASK));
+		mnUsuarios.add(mntmGestionarUsuarios);
+		
+		mntmUsuariosPdf = new JMenuItem("Informe (PDF)");
+		mntmUsuariosPdf.setIcon(new ImageIcon(LibrosGUI.class.getResource("/resources/pdf16.png")));
+		mnUsuarios.add(mntmUsuariosPdf);
+		
+		mnPrestamos = new JMenu("Prestamos");
+		mnUsuariosYPrestamos.add(mnPrestamos);
+		
+		mntmGestionarPrestamos = new JMenuItem("Gestionar prestamos");
+		mntmGestionarPrestamos.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
+		mnPrestamos.add(mntmGestionarPrestamos);
+		
+		mntmPrestamosPdf = new JMenuItem("Informe (PDF)");
+		mntmPrestamosPdf.setIcon(new ImageIcon(LibrosGUI.class.getResource("/resources/pdf16.png")));
+		mnPrestamos.add(mntmPrestamosPdf);
+		
+		mnNewMenu = new JMenu("Ayuda");
 		mnNewMenu.setMnemonic('y');
 		menuBar.add(mnNewMenu);
 		
-		JMenuItem menuAyuGithub = new JMenuItem("GitHub");
+		menuAyuGithub = new JMenuItem("GitHub");
 
 		menuAyuGithub.setIcon(new ImageIcon(LibrosGUI.class.getResource("/resources/gitHub1.png")));
 		mnNewMenu.add(menuAyuGithub);
 		
-		JMenuItem menuAyuDocu = new JMenuItem("Documentaci\u00F3n");
+		menuAyuDocu = new JMenuItem("Documentaci\u00F3n");
 		menuAyuDocu.setIcon(new ImageIcon(LibrosGUI.class.getResource("/resources/help.png")));
 		mnNewMenu.add(menuAyuDocu);
 		
-		JMenuItem menuAyuLicencia = new JMenuItem("Licencia");
+		menuAyuLicencia = new JMenuItem("Licencia");
 		mnNewMenu.add(menuAyuLicencia);
 		
-		JButton btnAtras = new JButton("Atras");
+		btnAtras = new JButton("Atras");
 		btnAtras.setMnemonic('s');
 
 		menuBar.add(Box.createHorizontalGlue());
@@ -143,32 +218,32 @@ public class LibrosGUI extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		CardLayout cl = new CardLayout();
+		cl = new CardLayout();
 		contentPane.setLayout(cl);
 		
-		JPanel panelVacio = new JPanel();
+		panelVacio = new JPanel();
 		contentPane.add(panelVacio, "menuVacio");
 		SpringLayout sl_panelVacio = new SpringLayout();
 		panelVacio.setLayout(sl_panelVacio);
 		
-		JLabel lblNewLabel_2 = new JLabel("Javateca 0.1");
+		lblNewLabel_2 = new JLabel("Javateca 0.1");
 		lblNewLabel_2.setBackground(Color.WHITE);
 		sl_panelVacio.putConstraint(SpringLayout.WEST, lblNewLabel_2, 28, SpringLayout.WEST, panelVacio);
 		sl_panelVacio.putConstraint(SpringLayout.SOUTH, lblNewLabel_2, -10, SpringLayout.SOUTH, panelVacio);
 		lblNewLabel_2.setFont(new Font("Sitka Banner", Font.PLAIN, 29));
 		panelVacio.add(lblNewLabel_2);
 		
-		JLabel lblNewLabel_1 = new JLabel("");
+		lblNewLabel_1 = new JLabel("");
 		sl_panelVacio.putConstraint(SpringLayout.SOUTH, lblNewLabel_1, 0, SpringLayout.SOUTH, panelVacio);
 		sl_panelVacio.putConstraint(SpringLayout.EAST, lblNewLabel_1, 0, SpringLayout.EAST, panelVacio);
 		lblNewLabel_1.setIcon(new ImageIcon(LibrosGUI.class.getResource("/resources/fondoLibros.png")));
 		panelVacio.add(lblNewLabel_1);
 		
-		// TODO Cambiar conexiones para que vengan del padre.
-		
-		contentPane.add(new GestionLibros().gestion(ConBD.conectar("SERVER2012", "1521", "BIBLIOTECA", "BIBLIOTECA")),"gestLibros");
-		contentPane.add(new GestionCd().gestion(ConBD.conectar("SERVER2012", "1521", "BIBLIOTECA", "BIBLIOTECA")),"gestCd");
-		contentPane.add(new GestionRevistas().gestion(ConBD.conectar("SERVER2012", "1521", "BIBLIOTECA", "BIBLIOTECA")),"gestRev");
+		contentPane.add(new GestionLibros().gestion(conn),"gestLibros");
+		contentPane.add(new GestionCd().gestion(conn),"gestCd");
+		contentPane.add(new GestionRevistas().gestion(conn),"gestRev");
+		contentPane.add(new GestionUsuarios().gestion(conn),"gestUsu");
+		contentPane.add(new GestionPrestamos().gestion(conn,"%"),"gestPres");
 		
 		menuAyuGithub.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -221,6 +296,28 @@ public class LibrosGUI extends JFrame {
 			}
 		});
 		
+		mntmGestionarUsuarios.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				cl.show(contentPane, "gestUsu");
+				setTitle("Javateca - Gestión de usuarios");
+				btnAtras.setVisible(true);
+				
+			}
+		});
+		
+		mntmGestionarPrestamos.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				cl.show(contentPane, "gestPres");
+				setTitle("Javateca - Gestión de préstamos");
+				btnAtras.setVisible(true);
+				
+			}
+		});
+		
 		menuArSalir.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
 		menuArSalir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -230,8 +327,75 @@ public class LibrosGUI extends JFrame {
 			}
 		});
 		
+		mntmLibrosPdf.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				CrearPDF.generar(conn, "JAVATECA_LIBROS", " libros en la base de datos:");
+				
+			}
+		});
+		
+		mntmCDPdf.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				CrearPDF.generar(conn, "JAVATECA_CDROMS", " CD-ROMs en la base de datos:");
+				
+			}
+		});
+		
+		mntmRevistasPdf.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				
+				CrearPDF.generar(conn, "JAVATECA_REVISTAS", " revistas en la base de datos:");
+				
+			}
+		});
+		
+		mntmUsuariosPdf.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				
+				CrearPDF.generar(conn, "JAVATECA_USUARIOS", " usuarios en la base de datos:");
+				
+			}
+		});
+		
+		mntmPrestamosPdf.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				
+				CrearPDF.generar(conn, "JAVATECA_PRESTAMOS", " prestamos en la base de datos:");
+				
+			}
+		});
+		
+		menuArPreferencias.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				new MenuConfig();
+				
+			}
+		});
+		
 
 		
 		setLocationRelativeTo(null);
+	}
+	
+	public static void lanzaArticulos(String codRevista) {
+		// TODO Cambiar metodo de conexion a BD
+		contentPane.add(new GestionArticulos().gestion(ConBD.conectar("SERVER2012", "1521", "BIBLIOTECA", "BIBLIOTECA"),codRevista),"gestArt");
+		cl.show(contentPane, "gestArt");
+		btnAtras.setVisible(true);
+		
+	}
+	
+	public static void lanzaPrestamos(String codUsuario) {
+		// TODO Cambiar metodo de conexion a BD
+		contentPane.add(new GestionPrestamos().gestion(ConBD.conectar("SERVER2012", "1521", "BIBLIOTECA", "BIBLIOTECA"),codUsuario),"gestPres");
+		cl.show(contentPane, "gestPres");
+		btnAtras.setVisible(true);
+		
 	}
 }

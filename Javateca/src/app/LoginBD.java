@@ -5,9 +5,6 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-
-import otros.PruebaBD;
-
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import java.awt.Font;
@@ -15,7 +12,6 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
 import java.util.concurrent.TimeUnit;
 import java.awt.event.ActionEvent;
 import java.awt.Toolkit;
@@ -53,6 +49,7 @@ public class LoginBD extends JFrame {
 	 * Create the frame.
 	 */
 	
+	@SuppressWarnings("deprecation")
 	public void login() {
 		
 		try {
@@ -62,14 +59,14 @@ public class LoginBD extends JFrame {
 			En ese lapso de tiempo, hay programas maliciosos que pueden capturarla.
 			Pero implementar una contraseña mas segura es una tarea compleja y por motivo de falta de tiempo, usare getText por el momento.
 			 */
-			@SuppressWarnings("deprecation")
-			Connection conn = ConBD.conectar(rutaField.getText(), puertoField.getText(), usuarioField.getText(), passField.getText());
 
-			PruebaBD.chorrada(conn);
 			
 			dispose();
 			
 			try {
+				
+				
+				
 				Splash splash = new Splash();
 				splash.setVisible(true);
 				splash.setBackground(new Color(0,0,0,0));
@@ -78,16 +75,18 @@ public class LoginBD extends JFrame {
 				
 				splash.dispose();
 				
-				LibrosGUI app = new LibrosGUI();
+				LibrosGUI app = new LibrosGUI(ConBD.conectar(rutaField.getText(), puertoField.getText(), usuarioField.getText(), passField.getText()));
 				app.setVisible(true);
 				
 			} catch (Exception e) {
 				e.printStackTrace();
+				
 			}
 		
 		
 		} catch (NullPointerException e) {
 			System.out.println("Error de conexion: "+e.getMessage());
+			
 		}
 		
 	}
@@ -115,14 +114,6 @@ public class LoginBD extends JFrame {
 		contentPane.add(lblOracleLogin);
 		
 		rutaField = new JTextField();
-		rutaField.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				login();
-				
-			}
-		});
-		rutaField.setText("www.navunov.es");
 		rutaField.setToolTipText("La ruta hacia el servidor Oracle. Ejemplo: \"localhost\", \"192.168.1.00\"");
 		rutaField.setBounds(128, 268, 200, 20);
 		contentPane.add(rutaField);
@@ -134,28 +125,12 @@ public class LoginBD extends JFrame {
 		contentPane.add(lblRuta);
 		
 		puertoField = new JTextField();
-		puertoField.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				login();
-				
-			}
-		});
-		puertoField.setText("1521");
 		puertoField.setToolTipText("El puerto de conexion de la BD. Ejemplo: \"1521\"");
 		puertoField.setColumns(10);
 		puertoField.setBounds(128, 299, 200, 20);
 		contentPane.add(puertoField);
 		
 		usuarioField = new JTextField();
-		usuarioField.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				login();
-				
-			}
-		});
-		usuarioField.setText("BIBLIOTECA");
 		usuarioField.setToolTipText("El nombre de usuario de la base de datos.");
 		usuarioField.setColumns(10);
 		usuarioField.setBounds(128, 330, 200, 20);
@@ -172,13 +147,7 @@ public class LoginBD extends JFrame {
 		contentPane.add(lblUsuario);
 		
 		passField = new JPasswordField();
-		passField.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				
-				login();
-				
-			}
-		});
+
 		passField.setToolTipText("La contrase\u00F1a del usuario en la base de datos");
 		passField.setColumns(10);
 		passField.setBounds(128, 361, 200, 20);
@@ -202,10 +171,50 @@ public class LoginBD extends JFrame {
 		contentPane.add(btnNewButton);
 		
 		JCheckBox chkRecordar = new JCheckBox("Recordar datos");
+
 		chkRecordar.setFont(new Font("Arial", Font.PLAIN, 11));
 		chkRecordar.setToolTipText("Cuando esta marcado, guardara los datos de conexi\u00F3n (menos la contrase\u00F1a) para el proximo inicio");
 		chkRecordar.setBounds(128, 388, 101, 23);
 		contentPane.add(chkRecordar);
+		
+		if(Configuracion.leerValor("login.recordar").equals("true")) {
+			
+			chkRecordar.setSelected(true);
+			rutaField.setText(Configuracion.leerValor("login.url"));
+			puertoField.setText(Configuracion.leerValor("login.puerto"));
+			usuarioField.setText(Configuracion.leerValor("login.usuario"));
+			
+		}
+		
+		chkRecordar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				if(chkRecordar.isSelected()) {
+					
+					Configuracion.escribir("login.recordar", "true");
+					Configuracion.escribir("login.url", rutaField.getText());
+					Configuracion.escribir("login.puerto", puertoField.getText());
+					Configuracion.escribir("login.usuario", usuarioField.getText());
+					
+				}
+				
+				if(!chkRecordar.isSelected()) {
+					
+					Configuracion.escribir("login.recordar", "false");
+					Configuracion.escribir("login.url", "");
+					Configuracion.escribir("login.puerto", "");
+					Configuracion.escribir("login.usuario", "");
+					
+				}
+
+				
+			}
+		});
+		
+		getRootPane().setDefaultButton(btnNewButton);
+		
 		this.setLocationRelativeTo(null);
+		
+		
 	}
 }

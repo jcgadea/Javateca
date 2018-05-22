@@ -44,28 +44,7 @@ public class GestionCd {
 	private JButton btnEliminar;
 	private JLabel avisoYaExiste;
 	private DefaultTableModel modelo;
-	
-	private void vaciar() {
 		
-		   codCDTField.setText("");
-		   signaturaTField.setText("");
-		   tituloTField.setText("");
-		   autorTField.setText("");
-		   materiaTField.setText("");
-		   editorialTField.setText("");
-		   
-		   codCDTField.setEditable(true);
-		   codCDTField.setBackground(new Color(255,255,255));
-		   
-		   btnNuevoMod.setText("Nuevo");
-		   btnNuevoMod.setToolTipText("Da de alta un nuevo registro con los datos del formulario");
-		   
-		   avisoYaExiste.setForeground(Color.WHITE);
-		   
-		   btnEliminar.setEnabled(false);
-		
-	}
-	
 	private void vaciar(Connection conn) {
 		
 		   codCDTField.setText("");
@@ -87,7 +66,7 @@ public class GestionCd {
 		   
 		   textFieldBusqueda.setText("");
 		   
-		   String sql = "select * from cdroms";
+		   String sql = "select * from JAVATECA_CDROMS";
 		   
 		   modelo = Buscador.buscar(sql, conn);
 		   
@@ -107,23 +86,21 @@ public class GestionCd {
 		
 		try {
 			
-			modelo = Buscador.buscar("select * from cdroms", conn);
+			modelo = Buscador.buscar("select * from JAVATECA_CDROMS", conn);
 				
 			JScrollPane scrollPane = new JScrollPane();
 			
-			tableDatos = new JTable(modelo);
-			tableDatos.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					
-					int fila = tableDatos.rowAtPoint(e.getPoint());
-					if ((fila > -1)) {
-						
-					   //System.out.println(modelo.getValueAt(fila,0));
-					   
-					}
-				}
-			});
+			tableDatos = new JTable(modelo) {
+		        private static final long serialVersionUID = 1L;
+
+		        public boolean isCellEditable(int row, int column) {                
+		                return false; 
+		                
+		        
+		        };
+		    };
+		    
+		    tableDatos.getTableHeader().setReorderingAllowed(false);
 			
 			scrollPane.setViewportView(tableDatos);
 			tableDatos.setBackground(SystemColor.controlHighlight);
@@ -150,11 +127,11 @@ public class GestionCd {
 					
 					if(textFieldBusqueda.getText().equals("")) {
 						
-						sql = "select * from CDROMS";
+						sql = "select * from JAVATECA_CDROMS";
 						
 					}else {
 					
-						sql = "select * from CDROMS where upper("+comboBoxBuscar.getSelectedItem()+") like upper('"+textFieldBusqueda.getText()+"%')";
+						sql = "select * from JAVATECA_CDROMS where upper("+comboBoxBuscar.getSelectedItem()+") like upper('"+textFieldBusqueda.getText()+"%')";
 						
 					}
 					
@@ -403,11 +380,11 @@ public class GestionCd {
 				@Override
 				public void keyReleased(KeyEvent arg0) {
 					
-					if(Buscador.existeClave("cdroms", "cod_cdrom", codCDTField.getText().toUpperCase(), conn)){
+					if(Buscador.existeClave("JAVATECA_CDROMS", "COD_CDROM", codCDTField.getText().toUpperCase(), conn, null)){
 						
 						avisoYaExiste.setForeground(Color.RED);
 						textFieldBusqueda.setText(codCDTField.getText());
-						String sql = "select * from CDROMS where COD_CDROM like upper('"+codCDTField.getText()+"')";
+						String sql = "select * from JAVATECA_CDROMS where COD_CDROM like upper('"+codCDTField.getText()+"')";
 						tableDatos.setModel(Buscador.buscar(sql, conn));
 						btnNuevoMod.setText("Modificar");
 						btnNuevoMod.setToolTipText("Modifica el registro seleccionado");
@@ -417,7 +394,7 @@ public class GestionCd {
 						
 						avisoYaExiste.setForeground(Color.WHITE);
 						textFieldBusqueda.setText("");
-						String sql = "select * from CDROMS";
+						String sql = "select * from JAVATECA_CDROMS";
 						tableDatos.setModel(Buscador.buscar(sql, conn));
 						btnNuevoMod.setText("Nuevo");
 						btnNuevoMod.setToolTipText("Da de alta un nuevo registro con los datos del formulario");
@@ -441,7 +418,7 @@ public class GestionCd {
 					
 					if(btnNuevoMod.getText().equals("Nuevo")) {
 						
-						String sql = "INSERT INTO CDROMS(COD_CDROM,SIGNATURA,TITULO,AUTOR,MATERIA,EDITORIAL) VALUES"
+						String sql = "INSERT INTO JAVATECA_CDROMS(COD_CDROM,SIGNATURA,TITULO,AUTOR,MATERIA,EDITORIAL) VALUES"
 								+ "('"+codCDTField.getText().toUpperCase()+"','"
 								+ signaturaTField.getText().toUpperCase()+"','"
 								+ tituloTField.getText().toUpperCase()+"','"
@@ -455,14 +432,14 @@ public class GestionCd {
 							
 							
 							textFieldBusqueda.setText("");
-							sql = "select * from CDROMS";
+							sql = "select * from JAVATECA_CDROMS";
 							modelo = Buscador.buscar(sql, conn);
 							tableDatos.setModel(modelo);
 							
 							Object frame = null;
 							JOptionPane.showMessageDialog((Component) frame,
 								    "CD-ROM con COD_CDROM '"+codCDTField.getText()+"' creado correctamente.","Creación correcta",JOptionPane.DEFAULT_OPTION);
-							vaciar();
+							vaciar(conn);
 							
 							
 						}else {
@@ -475,7 +452,7 @@ public class GestionCd {
 						
 					}else {
 						
-						String sql = "UPDATE CDROMS SET "
+						String sql = "UPDATE JAVATECA_CDROMS SET "
 								+ "SIGNATURA = '"+signaturaTField.getText().toUpperCase()+"',"
 								+ "TITULO = '"+tituloTField.getText().toUpperCase()+"',"
 								+ "AUTOR = '"+autorTField.getText().toUpperCase()+"',"
@@ -483,14 +460,14 @@ public class GestionCd {
 								+ "EDITORIAL = '"+editorialTField.getText().toUpperCase()+"'"
 								+ " WHERE COD_CDROM = '"+codCDTField.getText().toUpperCase()+"'";
 						
-						System.out.println(sql);
+						//System.out.println(sql);
 						
 						if(ConBD.ejecutarUpdateSQL(conn, sql)) {
 							
 							Object frame = null;
 							
 							
-							sql = "select * from CDROMS where COD_CDROM = '"+codCDTField.getText()+"'";
+							sql = "select * from JAVATECA_CDROMS where COD_CDROM = '"+codCDTField.getText()+"'";
 							modelo = Buscador.buscar(sql, conn);
 							tableDatos.setModel(modelo);
 							
@@ -515,12 +492,12 @@ public class GestionCd {
 			btnEliminar.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					
-					String sql = "DELETE FROM CDROMS WHERE COD_CDROM = '"+codCDTField.getText()+"'";
+					String sql = "DELETE from JAVATECA_CDROMS WHERE COD_CDROM = '"+codCDTField.getText()+"'";
 					
 					if(ConBD.ejecutarUpdateSQL(conn, sql)) {
 						
 						textFieldBusqueda.setText("");
-						sql = "select * from CDROMS";
+						sql = "select * from JAVATECA_CDROMS";
 						modelo = Buscador.buscar(sql, conn);
 						tableDatos.setModel(modelo);
 						
@@ -528,7 +505,7 @@ public class GestionCd {
 						JOptionPane.showMessageDialog((Component) frame,
 							    "CD-ROM con COD_CDROM '"+codCDTField.getText()+"' eliminado correctamente.","Eliminación correcta",JOptionPane.DEFAULT_OPTION);
 						
-						vaciar();
+						vaciar(conn);
 						
 					}else {
 						

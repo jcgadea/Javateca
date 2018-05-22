@@ -42,25 +42,7 @@ public class GestionRevistas {
 	private JButton btnEliminar;
 	private JLabel avisoYaExiste;
 	private DefaultTableModel modelo;
-	
-	private void vaciar() {
-		
-		   codRevTField.setText("");
-		   materiaTField.setText("");
-		   nombreTField.setText("");
-		   signaturaTField.setText("");
-		   
-		   codRevTField.setEditable(true);
-		   codRevTField.setBackground(new Color(255,255,255));
-		   
-		   btnNuevoMod.setText("Nuevo");
-		   btnNuevoMod.setToolTipText("Da de alta un nuevo registro con los datos del formulario");
-		   
-		   avisoYaExiste.setForeground(Color.WHITE);
-		   
-		   btnEliminar.setEnabled(false);
-		
-	}
+	private JButton btnArticulos;
 	
 	private void vaciar(Connection conn) {
 		
@@ -77,11 +59,13 @@ public class GestionRevistas {
 		   
 		   avisoYaExiste.setForeground(Color.WHITE);
 		   
+		   
 		   btnEliminar.setEnabled(false);
+		   btnArticulos.setEnabled(false);
 		   
 		   textFieldBusqueda.setText("");
 		   
-		   String sql = "select * from REVISTAS";
+		   String sql = "select * from JAVATECA_REVISTAS";
 		   
 		   modelo = Buscador.buscar(sql, conn);
 		   
@@ -102,11 +86,22 @@ public class GestionRevistas {
 		
 		try {
 			
-			modelo = Buscador.buscar("select * from REVISTAS", conn);
+			modelo = Buscador.buscar("select * from JAVATECA_REVISTAS", conn);
 				
 			JScrollPane scrollPane = new JScrollPane();
 			
-			tableDatos = new JTable(modelo);
+			tableDatos = new JTable(modelo) {
+		        private static final long serialVersionUID = 1L;
+
+		        public boolean isCellEditable(int row, int column) {                
+		                return false; 
+		                
+		        
+		        };
+		    };
+		    
+		    tableDatos.getTableHeader().setReorderingAllowed(false);
+		    
 			tableDatos.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
@@ -145,11 +140,11 @@ public class GestionRevistas {
 					
 					if(textFieldBusqueda.getText().equals("")) {
 						
-						sql = "select * from REVISTAS";
+						sql = "select * from JAVATECA_REVISTAS";
 						
 					}else {
 					
-						sql = "select * from REVISTAS where upper("+comboBoxBuscar.getSelectedItem()+") like upper('"+textFieldBusqueda.getText()+"%')";
+						sql = "select * from JAVATECA_REVISTAS where upper("+comboBoxBuscar.getSelectedItem()+") like upper('"+textFieldBusqueda.getText()+"%')";
 						
 					}
 					
@@ -209,6 +204,9 @@ public class GestionRevistas {
 
 			btnEliminar.setToolTipText("Elimina PERMANENTEMENTE de la base de datos el registro seleccionado");
 			btnEliminar.setEnabled(false);
+			
+			btnArticulos = new JButton("Ver art\u00EDculos");
+
 			GroupLayout gl_contentPane = new GroupLayout(contentPane);
 			gl_contentPane.setHorizontalGroup(
 				gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -264,8 +262,10 @@ public class GestionRevistas {
 							.addGroup(gl_contentPane.createSequentialGroup()
 								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 611, Short.MAX_VALUE)
 								.addGap(77))))
-					.addGroup(gl_contentPane.createSequentialGroup()
-						.addContainerGap(401, Short.MAX_VALUE)
+					.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+						.addGap(72)
+						.addComponent(btnArticulos)
+						.addPreferredGap(ComponentPlacement.RELATED, 238, Short.MAX_VALUE)
 						.addComponent(btnVaciar, GroupLayout.PREFERRED_SIZE, 89, GroupLayout.PREFERRED_SIZE)
 						.addPreferredGap(ComponentPlacement.UNRELATED)
 						.addComponent(btnNuevoMod, GroupLayout.PREFERRED_SIZE, 89, GroupLayout.PREFERRED_SIZE)
@@ -322,11 +322,16 @@ public class GestionRevistas {
 							.addGroup(gl_contentPane.createSequentialGroup()
 								.addGap(14)
 								.addComponent(lblSignatura)))
-						.addGap(18)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-							.addComponent(btnVaciar)
-							.addComponent(btnNuevoMod)
-							.addComponent(btnEliminar))
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+							.addGroup(gl_contentPane.createSequentialGroup()
+								.addGap(18)
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+									.addComponent(btnVaciar)
+									.addComponent(btnNuevoMod)
+									.addComponent(btnEliminar)))
+							.addGroup(gl_contentPane.createSequentialGroup()
+								.addGap(18)
+								.addComponent(btnArticulos)))
 						.addGap(102))
 			);
 			contentPane.setLayout(gl_contentPane);
@@ -354,6 +359,8 @@ public class GestionRevistas {
 					   
 					   btnEliminar.setEnabled(true);
 					   
+					   btnArticulos.setEnabled(true);
+					   
 					}
 				}
 			});
@@ -362,25 +369,27 @@ public class GestionRevistas {
 				@Override
 				public void keyReleased(KeyEvent arg0) {
 					
-					if(Buscador.existeClave("REVISTAS", "COD_REVISTA", codRevTField.getText().toUpperCase(), conn)){
+					if(Buscador.existeClave("JAVATECA_REVISTAS", "COD_REVISTA", codRevTField.getText().toUpperCase(), conn, null)){
 						
 						avisoYaExiste.setForeground(Color.RED);
 						textFieldBusqueda.setText(codRevTField.getText());
-						String sql = "select * from REVISTAS where COD_REVISTA like upper('"+codRevTField.getText()+"')";
+						String sql = "select * from JAVATECA_REVISTAS where COD_REVISTA like upper('"+codRevTField.getText()+"')";
 						tableDatos.setModel(Buscador.buscar(sql, conn));
 						btnNuevoMod.setText("Modificar");
 						btnNuevoMod.setToolTipText("Modifica el registro seleccionado");
 						btnEliminar.setEnabled(true);
+						btnArticulos.setEnabled(true);
 						
 					}else {
 						
 						avisoYaExiste.setForeground(Color.WHITE);
 						textFieldBusqueda.setText("");
-						String sql = "select * from REVISTAS";
+						String sql = "select * from JAVATECA_REVISTAS";
 						tableDatos.setModel(Buscador.buscar(sql, conn));
 						btnNuevoMod.setText("Nuevo");
 						btnNuevoMod.setToolTipText("Da de alta un nuevo registro con los datos del formulario");
 						btnEliminar.setEnabled(false);
+						btnArticulos.setEnabled(false);
 						
 					}
 					
@@ -400,7 +409,7 @@ public class GestionRevistas {
 					
 					if(btnNuevoMod.getText().equals("Nuevo")) {
 						
-						String sql = "INSERT INTO REVISTAS(COD_REVISTA,MATERIA,NOMBRE,SIGNATURA) VALUES"
+						String sql = "INSERT INTO JAVATECA_REVISTAS(COD_REVISTA,MATERIA,NOMBRE,SIGNATURA) VALUES"
 								+ "('"+codRevTField.getText().toUpperCase()+"','"
 								+ materiaTField.getText().toUpperCase()+"','"
 								+ nombreTField.getText().toUpperCase()+"','"
@@ -412,14 +421,14 @@ public class GestionRevistas {
 							
 							
 							textFieldBusqueda.setText("");
-							sql = "select * from REVISTAS";
+							sql = "select * from JAVATECA_REVISTAS";
 							modelo = Buscador.buscar(sql, conn);
 							tableDatos.setModel(modelo);
 							
 							Object frame = null;
 							JOptionPane.showMessageDialog((Component) frame,
 								    "Revista con COD_REVISTA '"+codRevTField.getText()+"' creada correctamente.","Creación correcta",JOptionPane.DEFAULT_OPTION);
-							vaciar();
+							vaciar(conn);
 							
 							
 						}else {
@@ -432,20 +441,20 @@ public class GestionRevistas {
 						
 					}else {
 						
-						String sql = "UPDATE REVISTAS SET "
+						String sql = "UPDATE JAVATECA_REVISTAS SET "
 								+ "MATERIA = '"+materiaTField.getText().toUpperCase()+"',"
 								+ "NOMBRE = '"+nombreTField.getText().toUpperCase()+"',"
 								+ "SIGNATURA = '"+signaturaTField.getText().toUpperCase()+"'"
 								+ " WHERE COD_REVISTA = '"+codRevTField.getText().toUpperCase()+"'";
 						
-						System.out.println(sql);
+						//System.out.println(sql);
 						
 						if(ConBD.ejecutarUpdateSQL(conn, sql)) {
 							
 							Object frame = null;
 							
 							
-							sql = "select * from REVISTAS where COD_REVISTA = '"+codRevTField.getText()+"'";
+							sql = "select * from JAVATECA_REVISTAS where COD_REVISTA = '"+codRevTField.getText()+"'";
 							modelo = Buscador.buscar(sql, conn);
 							tableDatos.setModel(modelo);
 							
@@ -470,12 +479,12 @@ public class GestionRevistas {
 			btnEliminar.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					
-					String sql = "DELETE FROM REVISTAS WHERE COD_REVISTA = '"+codRevTField.getText()+"'";
+					String sql = "DELETE from JAVATECA_REVISTAS WHERE COD_REVISTA = '"+codRevTField.getText()+"'";
 					
 					if(ConBD.ejecutarUpdateSQL(conn, sql)) {
 						
 						textFieldBusqueda.setText("");
-						sql = "select * from REVISTAS";
+						sql = "select * from JAVATECA_REVISTAS";
 						modelo = Buscador.buscar(sql, conn);
 						tableDatos.setModel(modelo);
 						
@@ -483,7 +492,7 @@ public class GestionRevistas {
 						JOptionPane.showMessageDialog((Component) frame,
 							    "Revista con COD_REVISTA '"+codRevTField.getText()+"' eliminado correctamente.","Eliminación correcta",JOptionPane.DEFAULT_OPTION);
 						
-						vaciar();
+						vaciar(conn);
 						
 					}else {
 						
@@ -496,6 +505,15 @@ public class GestionRevistas {
 					
 				}
 			});
+			btnArticulos.setEnabled(false);
+			btnArticulos.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					
+					LibrosGUI.lanzaArticulos(codRevTField.getText());
+					vaciar(conn);
+					
+				}
+			});
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -504,5 +522,4 @@ public class GestionRevistas {
 		return contentPane;
 		
 	}
-	
 }

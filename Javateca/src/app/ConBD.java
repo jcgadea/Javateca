@@ -25,8 +25,9 @@ public class ConBD {
 				    e.getMessage(),
 				    "Error de conexión",
 				    JOptionPane.ERROR_MESSAGE);
-			
+			System.exit(0);
 			return null;
+			
 		}
 		
 		return conn;
@@ -43,7 +44,6 @@ public class ConBD {
 			return true;
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}
